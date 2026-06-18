@@ -6,6 +6,10 @@ import dotenv from 'dotenv'
 import authRoutes from './routes/auth.js'
 import productRoutes from './routes/products.js'  // add after authRoutes import
 import orderRoutes from './routes/orders.js'   // add with other imports
+import alertRoutes from './routes/alerts.js'
+import cron from 'node-cron'
+import { checkPriceAlerts } from './jobs/checkPriceAlerts.js'
+
 dotenv.config()
 
 const app = express()
@@ -23,6 +27,15 @@ app.get('/health', (req, res) => {
 app.use('/auth', authRoutes)
 app.use('/products', productRoutes)  // add after app.use('/auth', authRoutes)
 app.use('/orders', orderRoutes)   // add after products route
+app.use('/alerts', alertRoutes)
+
+// Run price alert check every 30 minutes
+cron.schedule('*/30 * * * *', () => {
+  console.log('Running price alert check...')
+  checkPriceAlerts()
+})
+
+
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
