@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import api from '../../lib/api'
 import toast from 'react-hot-toast'
+import { Link } from 'react-router-dom'
 
 const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Grains', 'Dairy', 'Spices', 'Others']
 
@@ -170,14 +171,16 @@ export default function Marketplace() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filtered.map(product => (
               <div key={product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                {product.image_url ? (
-                  <img src={product.image_url} alt={product.name}
-                    className="w-full h-40 object-cover" />
-                ) : (
-                  <div className="w-full h-40 bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center text-4xl">
-                    🌿
-                  </div>
-                )}
+                <Link to={`/products/${product.id}`}>
+  {product.image_url ? (
+    <img src={product.image_url} alt={product.name}
+      className="w-full h-40 object-cover" />
+  ) : (
+    <div className="w-full h-40 bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center text-4xl">
+      🌿
+    </div>
+  )}
+</Link>
                 <div className="p-4">
                   <div className="font-semibold text-gray-800 mb-1">{product.name}</div>
                   <div className="text-xs text-gray-400 mb-2">{product.category} · by {product.profiles?.name}</div>
