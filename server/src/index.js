@@ -29,6 +29,11 @@ app.use('/products', productRoutes)  // add after app.use('/auth', authRoutes)
 app.use('/orders', orderRoutes)   // add after products route
 app.use('/alerts', alertRoutes)
 
+app.use(cors({
+  origin: process.env.CLIENT_URL === '*' ? '*' : process.env.CLIENT_URL,
+  credentials: true
+}))
+
 // Run price alert check every 30 minutes
 cron.schedule('*/30 * * * *', () => {
   console.log('Running price alert check...')
