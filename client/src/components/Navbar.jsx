@@ -1,72 +1,109 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import toast from 'react-hot-toast'
 
 export default function Navbar() {
   const { profile, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const handleLogout = async () => {
     await logout()
-    toast.success('Logged out')
+    toast.success('Logged out successfully')
     navigate('/login')
   }
 
+  const farmerLinks = [
+    { to: '/farmer/dashboard', label: 'Dashboard', icon: '📊' },
+    { to: '/farmer/products', label: 'My Products', icon: '🌾' },
+    { to: '/farmer/orders', label: 'Orders', icon: '📦' },
+  ]
+
+  const buyerLinks = [
+    { to: '/buyer/marketplace', label: 'Marketplace', icon: '🛍️' },
+    { to: '/buyer/orders', label: 'My Orders', icon: '📋' },
+  ]
+
+  const links = profile?.role === 'farmer' ? farmerLinks : buyerLinks
+
+  const isActive = (path) => location.pathname === path
+
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-      
-      {/* Logo */}
-      <div className="flex items-center gap-2">
-        <span className="text-2xl">🌱</span>
-        <span className="text-lg font-bold text-green-700">Soil-to-Sale</span>
-      </div>
+    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
 
-      {/* Links */}
-      <div className="flex items-center gap-6">
-        {profile?.role === 'farmer' && (
-          <>
-            <Link to="/farmer/dashboard" className="text-sm text-gray-600 hover:text-green-600 font-medium">
-              Dashboard
-            </Link>
-            <Link to="/farmer/products" className="text-sm text-gray-600 hover:text-green-600 font-medium">
-              My Products
-            </Link>
-            <Link to="/farmer/orders" className="text-sm text-gray-600 hover:text-green-600 font-medium">
-              Orders
-            </Link>
-          </>
+          {/* Logo */}
+          <Link to={profile?.role === 'farmer' ? '/farmer/dashboard' : '/buyer/marketplace'}
+            className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white text-sm">
+              🌱
+            </div>
+            <span className="text-lg font-bold text-gray-900">Soil<span className="text-green-600">2</span>Sale</span>
+          </Link>
+
+          {/* Desktop links */}
+          <div className="hidden md:flex items-center gap-1">
+            {links.map(link => (
+              <Link key={link.to} to={link.to}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  isActive(link.to)
+                    ? 'bg-green-50 text-green-700'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+                }`}>
+                <span>{link.icon}</span>
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right side */}
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-sm font-bold text-green-700">
+                {profile?.name?.charAt(0).toUpperCase()}
+              </div>
+              <div className="text-sm">
+                <div className="font-medium text-gray-800">{profile?.name}</div>
+                <div className={`text-xs ${profile?.role === 'farmer' ? 'text-green-600' : 'text-blue-600'}`}>
+                  {profile?.role}
+                </div>
+              </div>
+            </div>
+
+            <button onClick={handleLogout}
+              className="hidden md:flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-500 transition-colors px-3 py-2 rounded-xl hover:bg-red-50">
+              <span>→</span> Logout
+            </button>
+
+            {/* Mobile menu button */}
+            <button onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100">
+              {menuOpen ? '✕' : '☰'}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-gray-100 py-3 space-y-1">
+            {links.map(link => (
+              <Link key={link.to} to={link.to}
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium ${
+                  isActive(link.to) ? 'bg-green-50 text-green-700' : 'text-gray-600'
+                }`}>
+                {link.icon} {link.label}
+              </Link>
+            ))}
+            <button onClick={handleLogout}
+              className="w-full text-left px-4 py-2.5 text-sm text-red-500 font-medium">
+              → Logout
+            </button>
+          </div>
         )}
-
-        {profile?.role === 'buyer' && (
-          <>
-            <Link to="/buyer/marketplace" className="text-sm text-gray-600 hover:text-green-600 font-medium">
-              Marketplace
-            </Link>
-            <Link to="/buyer/orders" className="text-sm text-gray-600 hover:text-green-600 font-medium">
-              My Orders
-            </Link>
-          </>
-        )}
-      </div>
-
-      {/* User info + logout */}
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-500">
-          👤 {profile?.name}
-          <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-medium ${
-            profile?.role === 'farmer' 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-blue-100 text-blue-700'
-          }`}>
-            {profile?.role}
-          </span>
-        </span>
-        <button
-          onClick={handleLogout}
-          className="text-sm text-red-500 hover:text-red-700 font-medium"
-        >
-          Logout
-        </button>
       </div>
     </nav>
   )
