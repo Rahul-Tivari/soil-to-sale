@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import api from '../../lib/api'
 import toast from 'react-hot-toast'
+import PaymentModal from '../../components/PaymentModal'
 
 const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Grains', 'Dairy', 'Spices', 'Others']
 const SORT_OPTIONS = [
@@ -22,6 +23,7 @@ export default function Marketplace() {
   const [showCart, setShowCart] = useState(false)
   const [placing, setPlacing] = useState(false)
   const navigate = useNavigate()
+const [showPayment, setShowPayment] = useState(false)
 
   const fetchProducts = async () => {
     try {
@@ -74,24 +76,13 @@ export default function Marketplace() {
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0)
 
-  const placeOrder = async () => {
-    if (cart.length === 0) return toast.error('Cart is empty')
-    setPlacing(true)
-    try {
-      await api.post('/orders', {
-        items: cart.map(i => ({ product_id: i.product_id, quantity: i.quantity }))
-      })
-      toast.success('Order placed successfully!')
-      setCart([])
-      setShowCart(false)
-      navigate('/buyer/orders')
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to place order')
-    } finally {
-      setPlacing(false)
-    }
-  }
-
+const placeOrder = () => {
+  console.log('placeOrder called, cart length:', cart.length)
+  if (cart.length === 0) return toast.error('Cart is empty')
+  setShowCart(false)
+  setShowPayment(true)
+  console.log('showPayment set to true')
+}
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -156,9 +147,9 @@ export default function Marketplace() {
                     <div className="text-xs text-gray-400">Total amount</div>
                     <div className="text-xl font-bold text-gray-800">₹{cartTotal}</div>
                   </div>
-                  <button onClick={placeOrder} disabled={placing} className="btn-primary">
-                    {placing ? 'Placing order...' : '✓ Place Order'}
-                  </button>
+                  <button onClick={placeOrder} className="btn-primary">
+  ✓ Place Order
+</button>
                 </div>
               </>
             )}
@@ -236,8 +227,16 @@ export default function Marketplace() {
               </div>
             ))}
           </div>
-        )}
+)}
       </div>
+
+      {showPayment && (
+        <PaymentModal
+          cart={cart}
+          total={cartTotal}
+          onClose={() => setShowPayment(false)}
+        />
+      )}
     </div>
   )
 }

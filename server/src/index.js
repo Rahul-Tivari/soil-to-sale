@@ -9,6 +9,7 @@ import orderRoutes from './routes/orders.js'   // add with other imports
 import alertRoutes from './routes/alerts.js'
 import cron from 'node-cron'
 import { checkPriceAlerts } from './jobs/checkPriceAlerts.js'
+import paymentRoutes from './routes/payment.js'
 
 dotenv.config()
 
@@ -28,6 +29,7 @@ app.use('/auth', authRoutes)
 app.use('/products', productRoutes)  // add after app.use('/auth', authRoutes)
 app.use('/orders', orderRoutes)   // add after products route
 app.use('/alerts', alertRoutes)
+app.use('/payment', paymentRoutes)
 
 app.use(cors({
   origin: process.env.CLIENT_URL === '*' ? '*' : process.env.CLIENT_URL,
